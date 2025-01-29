@@ -1,5 +1,6 @@
 import { Bookmark, BookmarkFilter, SelectionState } from '../types';
 import { bookmarkApi } from '../api';
+import { MultiSelect } from './MultiSelect';
 
 function escapeHtml(unsafe: string): string {
     return unsafe
@@ -21,18 +22,16 @@ export class BookmarkList {
     };
     private loading = false;
     private hasMore = true;
-    private selection: SelectionState = {
-        selectedIds: new Set(),
-        isAllSelected: false
-    };
+    private multiSelect: MultiSelect;
     private intersectionObserver!: IntersectionObserver;
 
-    constructor(containerId: string) {
+    constructor(containerId: string, multiSelect: MultiSelect) {
         console.log('[DEBUG_LOG] Initializing BookmarkList with containerId:', containerId);
         const element = document.getElementById(containerId);
         console.log('[DEBUG_LOG] Found container element:', !!element);
         if (!element) throw new Error(`Element with id ${containerId} not found`);
         this.container = element;
+        this.multiSelect = multiSelect;
         this.setupIntersectionObserver();
         this.init();
     }
@@ -67,18 +66,6 @@ export class BookmarkList {
                 this.resetAndReload();
             });
         }
-
-        // Select all button
-        const selectAllBtn = document.getElementById('select-all');
-        if (selectAllBtn) {
-            selectAllBtn.addEventListener('click', () => this.toggleSelectAll());
-        }
-
-        // Delete selected button
-        const deleteSelectedBtn = document.getElementById('delete-selected');
-        if (deleteSelectedBtn) {
-            deleteSelectedBtn.addEventListener('click', () => this.deleteSelected());
-        }
     }
 
     public setFolderId(folderId: number | null) {
@@ -97,7 +84,7 @@ export class BookmarkList {
         this.currentFilter.page = 0;
         this.hasMore = true;
         this.loading = false;
-        this.selection = { selectedIds: new Set(), isAllSelected: false };
+        this.multiSelect.clearSelection();
         console.log('[DEBUG] Reset state - currentFilter:', this.currentFilter);
         await this.loadBookmarks();
         console.log('[DEBUG] Completed resetAndReload');
@@ -155,50 +142,9 @@ export class BookmarkList {
         await this.loadBookmarks();
     }
 
-    private toggleSelectAll() {
-        if (this.selection.isAllSelected) {
-            this.selection = { selectedIds: new Set(), isAllSelected: false };
-        } else {
-            const allIds = this.bookmarks.map(b => b.id!);
-            this.selection = { selectedIds: new Set(allIds), isAllSelected: true };
-        }
-        this.updateDeleteButton();
-        this.render();
-    }
-
     private toggleBookmarkSelection(bookmarkId: number) {
-        if (this.selection.selectedIds.has(bookmarkId)) {
-            this.selection.selectedIds.delete(bookmarkId);
-        } else {
-            this.selection.selectedIds.add(bookmarkId);
-        }
-        this.selection.isAllSelected = this.selection.selectedIds.size === this.bookmarks.length;
-        this.updateDeleteButton();
+        this.multiSelect.toggleSelection(bookmarkId);
         this.render();
-    }
-
-    private updateDeleteButton() {
-        const deleteBtn = document.getElementById('delete-selected');
-        if (deleteBtn) {
-            if (this.selection.selectedIds.size > 0) {
-                deleteBtn.classList.remove('hidden');
-            } else {
-                deleteBtn.classList.add('hidden');
-            }
-        }
-    }
-
-    private async deleteSelected() {
-        if (this.selection.selectedIds.size === 0) return;
-
-        if (!confirm(`Are you sure you want to delete ${this.selection.selectedIds.size} bookmarks?`)) return;
-
-        try {
-            await bookmarkApi.deleteBookmarks(Array.from(this.selection.selectedIds));
-            await this.resetAndReload();
-        } catch (error) {
-            console.error('Error deleting bookmarks:', error);
-        }
     }
 
     private render() {
@@ -225,12 +171,12 @@ export class BookmarkList {
 
                 return `
                     <div class="bookmark-item p-4 hover:bg-gray-50 ${
-                        this.selection.selectedIds.has(bookmark.id!) ? 'bg-blue-50' : ''
+                        this.multiSelect.isSelected(bookmark.id!) ? 'bg-blue-50' : ''
                     }" data-bookmark-id="${bookmark.id}">
                         <div class="flex items-center space-x-4">
                             <input type="checkbox" 
                                    class="h-4 w-4 text-blue-600 rounded border-gray-300"
-                                   ${this.selection.selectedIds.has(bookmark.id!) ? 'checked' : ''}>
+                                   ${this.multiSelect.isSelected(bookmark.id!) ? 'checked' : ''}>
                             <div class="flex-1">
                                 <h3 class="text-lg font-medium">
                                     <a href="${escapeHtml(bookmark.url)}" target="_blank" class="text-blue-600 hover:underline">

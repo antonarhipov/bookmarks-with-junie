@@ -22,19 +22,15 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // Initialize components
-    console.log('[DEBUG] Creating BookmarkList...');
-    const bookmarkList = new BookmarkList('bookmark-list');
-    console.log('[DEBUG] Creating SearchBar...');
-    const searchBar = new SearchBar('search-bar', bookmarkList);
     console.log('[DEBUG] Creating MultiSelect...');
     const multiSelect = new MultiSelect('select-all', 'delete-selected', (state) => {
-        // Handle selection state changes
-        if (state.selectedIds.size > 0) {
-            document.getElementById('delete-selected')?.classList.remove('hidden');
-        } else {
-            document.getElementById('delete-selected')?.classList.add('hidden');
-        }
+        // MultiSelect handles visibility internally
     });
+
+    console.log('[DEBUG] Creating BookmarkList...');
+    const bookmarkList = new BookmarkList('bookmark-list', multiSelect);
+    console.log('[DEBUG] Creating SearchBar...');
+    const searchBar = new SearchBar('search-bar', bookmarkList);
 
     console.log('[DEBUG] Creating FolderView...');
     try {
