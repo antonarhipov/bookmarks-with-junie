@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bookmark Manager</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100">
+    <div class="min-h-screen flex flex-col">
+        <!-- Header -->
+        <header class="bg-white shadow-sm">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                <div class="flex justify-between items-center">
+                    <h1 class="text-2xl font-bold text-gray-900">Bookmark Manager</h1>
+                    <div class="w-1/3">
+                        <div id="search-bar" class="relative">
+                            <input type="text" 
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                   placeholder="Search bookmarks...">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="flex-1 flex">
+            <!-- Sidebar -->
+            <aside class="w-64 bg-white border-r border-gray-200">
+                <div class="p-4">
+                    <div class="flex justify-between items-center mb-4">
+                        <h2 class="text-lg font-semibold">Folders</h2>
+                        <button id="add-folder-btn" 
+                                type="button"
+                                class="p-2 text-blue-600 hover:text-blue-700 rounded-full hover:bg-blue-50 transition-colors duration-200 border border-blue-200 hover:border-blue-300 focus:outline-none focus:ring-2 focus:ring-blue-500" 
+                                aria-label="Add folder"
+                                data-action="add-folder">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                            </svg>
+                            <span class="sr-only">Add new folder</span>
+                        </button>
+                    </div>
+                    <div id="folder-tree" class="space-y-2">
+                        <!-- Folder tree will be populated by JavaScript -->
+                    </div>
+                </div>
+            </aside>
+
+            <!-- Main Content Area -->
+            <main class="flex-1 p-8">
+                <div class="bg-white rounded-lg shadow">
+                    <!-- Toolbar -->
+                    <div class="p-4 border-b border-gray-200 flex justify-between items-center">
+                        <div class="flex items-center space-x-4">
+                            <button id="select-all" class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-md hover:bg-gray-50">
+                                Select All
+                            </button>
+                            <button id="delete-selected" class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-md hover:bg-red-700 hidden">
+                                Delete Selected
+                            </button>
+                        </div>
+                        <div class="flex items-center space-x-4">
+                            <button id="new-bookmark" class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-md hover:bg-blue-700">
+                                New Bookmark
+                            </button>
+                            <select id="sort-by" class="px-4 py-2 text-sm border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500">
+                                <option value="title">Sort by Title</option>
+                                <option value="createdAt">Sort by Date</option>
+                                <option value="url">Sort by URL</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Bookmark List -->
+                    <div id="bookmark-list" class="divide-y divide-gray-200">
+                        <!-- Bookmarks will be populated by JavaScript -->
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script type="module" src="js/dist/main.js"></script>
+</body>
+</html>

@@ -55,7 +55,7 @@ public class FolderService {
 
     public void deleteFolder(Long id) {
         folderRepository.findById(id).ifPresent(folder -> {
-            if (bookmarkRepository.countBookmarksInFolder(id) > 0) {
+            if (bookmarkRepository.countByFolderId(id) > 0) {
                 throw new IllegalStateException("Cannot delete folder that contains bookmarks");
             }
             folderRepository.deleteById(id);

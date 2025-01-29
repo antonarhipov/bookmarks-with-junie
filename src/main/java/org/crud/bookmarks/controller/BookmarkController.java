@@ -2,6 +2,9 @@ package org.crud.bookmarks.controller;
 
 import org.crud.bookmarks.Bookmark;
 import org.crud.bookmarks.service.BookmarkService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import jakarta.validation.Valid;
@@ -21,7 +24,10 @@ public class BookmarkController {
 
     @GetMapping
     public List<Bookmark> getAllBookmarks() {
-        return bookmarkService.getAllBookmarks();
+        System.out.println("[DEBUG_LOG] Getting all bookmarks");
+        List<Bookmark> bookmarks = bookmarkService.getAllBookmarks();
+        System.out.println("[DEBUG_LOG] Retrieved " + bookmarks.size() + " bookmarks");
+        return bookmarks;
     }
 
     @GetMapping("/{id}")
@@ -32,13 +38,22 @@ public class BookmarkController {
     }
 
     @GetMapping("/folder/{folderId}")
-    public List<Bookmark> getBookmarksByFolderId(@PathVariable Long folderId) {
-        return bookmarkService.getBookmarksByFolderId(folderId);
+    public Page<Bookmark> getBookmarksByFolderId(
+            @PathVariable Long folderId,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "title") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir) {
+        Sort.Direction direction = Sort.Direction.fromString(sortDir);
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(direction, sortBy));
+        return bookmarkService.getBookmarksByFolderId(folderId, pageRequest);
     }
 
     @PostMapping
     public ResponseEntity<Bookmark> createBookmark(@Valid @RequestBody Bookmark bookmark) {
+        System.out.println("[DEBUG_LOG] Creating bookmark: " + bookmark);
         Bookmark createdBookmark = bookmarkService.createBookmark(bookmark);
+        System.out.println("[DEBUG_LOG] Created bookmark: " + createdBookmark);
         return ResponseEntity.ok(createdBookmark);
     }
 
@@ -55,9 +70,22 @@ public class BookmarkController {
         return ResponseEntity.ok().build();
     }
 
+    @DeleteMapping("/bulk")
+    public ResponseEntity<Void> deleteBookmarks(@RequestBody List<Long> ids) {
+        bookmarkService.deleteBookmarks(ids);
+        return ResponseEntity.ok().build();
+    }
+
     @GetMapping("/search")
-    public List<Bookmark> searchBookmarks(@RequestParam String query) {
-        return bookmarkService.searchBookmarks(query);
+    public Page<Bookmark> searchBookmarks(
+            @RequestParam String query,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "title") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir) {
+        Sort.Direction direction = Sort.Direction.fromString(sortDir);
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(direction, sortBy));
+        return bookmarkService.searchBookmarks(query, pageRequest);
     }
 
     @GetMapping("/folder/{folderId}/count")

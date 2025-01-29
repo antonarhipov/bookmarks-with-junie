@@ -1,0 +1,12 @@
+{
+  "name": "bookmarks-manager-ui",
+  "version": "1.0.0",
+  "description": "Frontend for Bookmarks Manager application",
+  "scripts": {
+    "build": "tsc && node scripts/fix-imports.js",
+    "watch": "tsc -w"
+  },
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  }
+}

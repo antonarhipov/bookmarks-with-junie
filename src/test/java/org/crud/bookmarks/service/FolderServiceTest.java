@@ -105,7 +105,7 @@ class FolderServiceTest {
     @Test
     void deleteFolder_WithNoBookmarks_ShouldDeleteFolder() {
         when(folderRepository.findById(1L)).thenReturn(Optional.of(testFolder));
-        when(bookmarkRepository.countBookmarksInFolder(1L)).thenReturn(0);
+        when(bookmarkRepository.countByFolderId(1L)).thenReturn(0);
 
         folderService.deleteFolder(1L);
 
@@ -115,7 +115,7 @@ class FolderServiceTest {
     @Test
     void deleteFolder_WithBookmarks_ShouldThrowException() {
         when(folderRepository.findById(1L)).thenReturn(Optional.of(testFolder));
-        when(bookmarkRepository.countBookmarksInFolder(1L)).thenReturn(1);
+        when(bookmarkRepository.countByFolderId(1L)).thenReturn(1);
 
         assertThrows(IllegalStateException.class, () ->
             folderService.deleteFolder(1L)
