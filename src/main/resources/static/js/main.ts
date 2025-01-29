@@ -39,7 +39,7 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('[DEBUG] Creating FolderView...');
     try {
         // Initialize folder view with bookmark list update callback
-        const folderView = new FolderView('folder-tree', (folderId: number) => {
+        const folderView = new FolderView('folder-tree', (folderId: number | null) => {
             bookmarkList.setFolderId(folderId);
             searchBar.clear(); // Clear search when changing folders
         });
