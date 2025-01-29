@@ -5,9 +5,9 @@ export class FolderView {
     private container: HTMLElement;
     private folders: Folder[] = [];
     private selectedFolderId: number | null = null;
-    private onFolderSelect: (folderId: number) => void;
+    private onFolderSelect: (folderId: number | null) => void;
 
-    constructor(containerId: string, onFolderSelect: (folderId: number) => void) {
+    constructor(containerId: string, onFolderSelect: (folderId: number | null) => void) {
         console.log('[DEBUG] Initializing FolderView with containerId:', containerId);
 
         // Debug DOM state
@@ -69,8 +69,15 @@ export class FolderView {
             const target = e.target as HTMLElement;
             const folderItem = target.closest('[data-folder-id]');
             if (folderItem) {
-                const folderId = Number(folderItem.getAttribute('data-folder-id'));
-                this.selectFolder(folderId);
+                const folderIdAttr = folderItem.getAttribute('data-folder-id');
+                if (folderIdAttr === 'all') {
+                    this.selectFolder('all');
+                } else {
+                    const folderId = Number(folderIdAttr);
+                    if (!isNaN(folderId)) {
+                        this.selectFolder(folderId);
+                    }
+                }
             }
         });
 
@@ -80,8 +87,14 @@ export class FolderView {
             const target = e.target as HTMLElement;
             const folderItem = target.closest('[data-folder-id]');
             if (folderItem) {
-                const folderId = Number(folderItem.getAttribute('data-folder-id'));
-                this.showContextMenu(e, folderId);
+                const folderIdAttr = folderItem.getAttribute('data-folder-id');
+                // Don't show context menu for "All Bookmarks"
+                if (folderIdAttr !== 'all') {
+                    const folderId = Number(folderIdAttr);
+                    if (!isNaN(folderId)) {
+                        this.showContextMenu(e, folderId);
+                    }
+                }
             }
         });
     }
@@ -201,10 +214,16 @@ export class FolderView {
         }
     }
 
-    private selectFolder(folderId: number) {
-        this.selectedFolderId = folderId;
-        this.render();
-        this.onFolderSelect(folderId);
+    private selectFolder(folderId: number | 'all') {
+        if (folderId === 'all') {
+            this.selectedFolderId = null;
+            this.render();
+            this.onFolderSelect(null);
+        } else {
+            this.selectedFolderId = folderId;
+            this.render();
+            this.onFolderSelect(folderId);
+        }
     }
 
     private async handleRenameFolder(folderId: number) {
@@ -282,7 +301,21 @@ export class FolderView {
     }
 
     private render() {
-        this.container.innerHTML = this.folders
+        // Create the "All Bookmarks" option and folder list
+        const allBookmarksHtml = `
+            <div class="folder-item ${this.selectedFolderId === null ? 'bg-blue-50' : ''}"
+                 data-folder-id="all">
+                <div class="flex items-center space-x-2 p-2 rounded hover:bg-gray-100 cursor-pointer">
+                    <svg class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                              d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                    </svg>
+                    <span class="text-sm font-medium">All Bookmarks</span>
+                </div>
+            </div>
+        `;
+
+        const foldersHtml = this.folders
             .map(folder => `
                 <div class="folder-item ${folder.id === this.selectedFolderId ? 'bg-blue-50' : ''}"
                      data-folder-id="${folder.id}">
@@ -296,5 +329,7 @@ export class FolderView {
                 </div>
             `)
             .join('');
+
+        this.container.innerHTML = allBookmarksHtml + foldersHtml;
     }
 }

@@ -16,21 +16,21 @@ public class BookmarksApplication {
         SpringApplication.run(BookmarksApplication.class, args);
     }
 
-    @Bean
-    public CommandLineRunner loggerTest() {
-        return args -> {
-            logger.trace("This is a TRACE level message");
-            logger.debug("This is a DEBUG level message");
-            logger.info("This is an INFO level message");
-            logger.warn("This is a WARN level message");
-            logger.error("This is an ERROR level message");
-
-            // Test exception logging
-            try {
-                throw new RuntimeException("Test exception for logging");
-            } catch (Exception e) {
-                logger.error("Caught test exception", e);
-            }
-        };
-    }
+//    @Bean
+//    public CommandLineRunner loggerTest() {
+//        return args -> {
+//            logger.trace("This is a TRACE level message");
+//            logger.debug("This is a DEBUG level message");
+//            logger.info("This is an INFO level message");
+//            logger.warn("This is a WARN level message");
+//            logger.error("This is an ERROR level message");
+//
+//            // Test exception logging
+//            try {
+//                throw new RuntimeException("Test exception for logging");
+//            } catch (Exception e) {
+//                logger.error("Caught test exception", e);
+//            }
+//        };
+//    }
 }
