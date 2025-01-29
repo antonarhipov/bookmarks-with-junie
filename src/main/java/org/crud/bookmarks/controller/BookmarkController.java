@@ -23,10 +23,16 @@ public class BookmarkController {
     }
 
     @GetMapping
-    public List<Bookmark> getAllBookmarks() {
-        System.out.println("[DEBUG_LOG] Getting all bookmarks");
-        List<Bookmark> bookmarks = bookmarkService.getAllBookmarks();
-        System.out.println("[DEBUG_LOG] Retrieved " + bookmarks.size() + " bookmarks");
+    public Page<Bookmark> getAllBookmarks(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size,
+            @RequestParam(defaultValue = "title") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir) {
+        System.out.println("[DEBUG_LOG] Getting all bookmarks with pagination");
+        Sort.Direction direction = Sort.Direction.fromString(sortDir);
+        PageRequest pageRequest = PageRequest.of(page, size, Sort.by(direction, sortBy));
+        Page<Bookmark> bookmarks = bookmarkService.getAllBookmarks(pageRequest);
+        System.out.println("[DEBUG_LOG] Retrieved " + bookmarks.getTotalElements() + " bookmarks");
         return bookmarks;
     }
 

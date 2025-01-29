@@ -35,6 +35,13 @@ public class BookmarkService {
         return bookmarks;
     }
 
+    public Page<Bookmark> getAllBookmarks(Pageable pageable) {
+        logger.debug("Fetching all bookmarks with pagination: {}", pageable);
+        Page<Bookmark> bookmarks = bookmarkRepository.findAll(pageable);
+        logger.debug("Fetched {} bookmarks", bookmarks.getTotalElements());
+        return bookmarks;
+    }
+
     public Optional<Bookmark> getBookmarkById(Long id) {
         logger.debug("Fetching bookmark with id: {}", id);
         Optional<Bookmark> bookmark = bookmarkRepository.findById(id);

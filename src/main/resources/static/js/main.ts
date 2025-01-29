@@ -4,8 +4,11 @@ import { SearchBar } from './components/SearchBar.js';
 import { MultiSelect } from './components/MultiSelect.js';
 import { BookmarkForm } from './components/BookmarkForm.js';
 
+console.log('[DEBUG_LOG] Main script loaded');
+
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('[DEBUG] Initializing components...');
+    console.log('[DEBUG_LOG] DOMContentLoaded event fired');
+    console.log('[DEBUG_LOG] Initializing components...');
 
     // Verify DOM elements exist
     const folderTreeElement = document.getElementById('folder-tree');

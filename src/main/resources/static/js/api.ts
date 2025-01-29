@@ -4,10 +4,19 @@ const API_BASE = '/api';
 
 // Error handling helper
 const handleResponse = async (response: Response) => {
+    console.log('[DEBUG_LOG] API Response:', {
+        url: response.url,
+        status: response.status,
+        ok: response.ok
+    });
+
     if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`);
     }
-    return response.json();
+
+    const data = await response.json();
+    console.log('[DEBUG_LOG] API Response Data:', data);
+    return data;
 };
 
 // Folder API
@@ -65,8 +74,23 @@ export const bookmarkApi = {
             endpoint = `${API_BASE}/bookmarks/folder/${filter.folderId}`;
         }
 
-        const response = await fetch(`${endpoint}?${params.toString()}`);
-        return handleResponse(response);
+        const url = `${endpoint}?${params.toString()}`;
+        console.log('[DEBUG_LOG] Fetching bookmarks:', {
+            url,
+            filter
+        });
+
+        try {
+            const response = await fetch(url);
+            return handleResponse(response);
+        } catch (error) {
+            console.error('[DEBUG_LOG] Error fetching bookmarks:', {
+                error,
+                url,
+                filter
+            });
+            throw error;
+        }
     },
 
     createBookmark: async (bookmark: Bookmark): Promise<Bookmark> => {

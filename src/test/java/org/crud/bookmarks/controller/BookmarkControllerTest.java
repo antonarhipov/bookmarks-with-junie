@@ -13,6 +13,9 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.Arrays;
 import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -112,11 +115,12 @@ class BookmarkControllerTest {
 
     @Test
     void searchBookmarks_ShouldReturnMatchingBookmarks() throws Exception {
-        when(bookmarkService.searchBookmarks("test"))
-                .thenReturn(Arrays.asList(testBookmark));
+        Page<Bookmark> page = new PageImpl<>(Arrays.asList(testBookmark));
+        when(bookmarkService.searchBookmarks(eq("test"), any(Pageable.class)))
+                .thenReturn(page);
 
         mockMvc.perform(get("/api/bookmarks/search").param("query", "test"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[0].title").value(testBookmark.getTitle()));
+                .andExpect(jsonPath("$.content[0].title").value(testBookmark.getTitle()));
     }
 }
