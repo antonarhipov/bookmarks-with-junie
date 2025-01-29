@@ -1,5 +1,7 @@
 # Bookmarks Manager
 
+> **Note**: This project is entirely generated using Junie, with no manual code writing involved. All features, implementations, and documentation are auto-generated to ensure consistency and maintainability.
+
 A web application for managing bookmarks with folder organization, lazy loading, and advanced search capabilities.
 
 ## Features
@@ -14,7 +16,7 @@ A web application for managing bookmarks with folder organization, lazy loading,
 ## Technology Stack
 
 ### Backend
-- Spring Boot 3.2.2
+- Spring Boot
 - Java 17
 - Spring Data JDBC
 - H2 Database
@@ -29,7 +31,7 @@ A web application for managing bookmarks with folder organization, lazy loading,
 ### Prerequisites
 - JDK 17 or higher
 - Node.js and npm
-- Gradle 7.x or higher
+- Gradle 
 
 ### Backend Setup
 1. Clone the repository
