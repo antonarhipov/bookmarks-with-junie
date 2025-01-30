@@ -35,17 +35,16 @@ export class MultiSelect {
         this.selectAllButton.addEventListener('click', () => this.toggleSelectAll());
     }
 
-    public toggleSelectAll() {
-        this.selectionState.isAllSelected = !this.selectionState.isAllSelected;
-        this.onSelectionChange(this.selectionState);
-        this.updateUI();
-    }
 
     public toggleSelection(id: number) {
         if (this.selectionState.selectedIds.has(id)) {
             this.selectionState.selectedIds.delete(id);
+            this.selectionState.isAllSelected = false;
         } else {
             this.selectionState.selectedIds.add(id);
+            // Check if all items are now selected
+            this.selectionState.isAllSelected = this.availableIds.length > 0 && 
+                this.availableIds.every(id => this.selectionState.selectedIds.has(id));
         }
         this.updateUI();
         this.onSelectionChange(this.selectionState);
@@ -68,16 +67,36 @@ export class MultiSelect {
         this.onSelectionChange(this.selectionState);
     }
 
-    public setTotalItems(totalItems: number) {
+    private availableIds: number[] = [];
+
+    public setAvailableItems(ids: number[]) {
+        this.availableIds = ids;
         if (this.selectionState.isAllSelected) {
-            this.selectionState.selectedIds = new Set(Array.from({ length: totalItems }, (_, i) => i));
+            this.selectionState.selectedIds = new Set(this.availableIds);
+            this.updateUI();
         }
+    }
+
+    public toggleSelectAll() {
+        console.log('[DEBUG_LOG] Select all button clicked');
+        this.selectionState.isAllSelected = !this.selectionState.isAllSelected;
+        if (this.selectionState.isAllSelected) {
+            this.selectionState.selectedIds = new Set(this.availableIds);
+        } else {
+            this.selectionState.selectedIds.clear();
+        }
+        console.log(`All selected: ${this.selectionState.isAllSelected}`);
+        console.log(this.selectionState);
+        this.onSelectionChange(this.selectionState);
         this.updateUI();
     }
 
     private updateUI() {
+        console.log('[DEBUG_LOG] Updating UI');
         // Update select all button text
         this.selectAllButton.textContent = this.selectionState.isAllSelected ? 'Deselect All' : 'Select All';
+
+        console.log(`Number of selected bookmarks: ${this.selectionState.selectedIds.size}`)
 
         // Show/hide delete button
         if (this.selectionState.selectedIds.size > 0) {

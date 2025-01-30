@@ -122,6 +122,9 @@ export class BookmarkList {
                 this.bookmarks = [...this.bookmarks, ...response.content];
             }
 
+            // Update MultiSelect with current bookmark IDs
+            this.multiSelect.setAvailableItems(this.bookmarks.map(b => b.id!));
+
             this.hasMore = this.currentFilter.page! < response.totalPages - 1;
             this.currentFilter.page! += 1;
 
