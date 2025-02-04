@@ -7,6 +7,7 @@ A web application for managing bookmarks with folder organization, lazy loading,
 ## Features
 
 - Folder organization for bookmarks
+- URL validation with resource accessibility check
 - Lazy loading for better performance
 - Search functionality
 - Sort bookmarks by various attributes
@@ -19,6 +20,7 @@ A web application for managing bookmarks with folder organization, lazy loading,
 - Spring Boot
 - Java 17
 - Spring Data JDBC
+- Spring WebFlux (WebClient)
 - H2 Database
 
 ### Frontend
@@ -72,7 +74,24 @@ A web application for managing bookmarks with folder organization, lazy loading,
     - `sortBy` (default: "title")
     - `sortDir` (default: "asc")
 - `POST /api/bookmarks` - Create new bookmark
+  - Validates URL accessibility (must return HTTP 200)
+  - Request body:
+    ```json
+    {
+      "title": "string",
+      "url": "string",
+      "description": "string (optional)",
+      "folderId": "number (optional)"
+    }
+    ```
+  - Error responses:
+    - `400 Bad Request` - If URL is invalid or resource is not accessible
 - `PUT /api/bookmarks/{id}` - Update bookmark
+  - Validates URL accessibility (must return HTTP 200)
+  - Request body: same as POST
+  - Error responses:
+    - `400 Bad Request` - If URL is invalid or resource is not accessible
+    - `404 Not Found` - If bookmark doesn't exist
 - `DELETE /api/bookmarks/{id}` - Delete bookmark
 - `DELETE /api/bookmarks/bulk` - Delete multiple bookmarks
 - `GET /api/bookmarks/search` - Search bookmarks (paginated)

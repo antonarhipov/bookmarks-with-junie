@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -22,10 +22,12 @@ public class BookmarkService {
 
     private final BookmarkRepository bookmarkRepository;
     private final FolderRepository folderRepository;
+    private final UrlValidator urlValidator;
 
-    public BookmarkService(BookmarkRepository bookmarkRepository, FolderRepository folderRepository) {
+    public BookmarkService(BookmarkRepository bookmarkRepository, FolderRepository folderRepository, UrlValidator urlValidator) {
         this.bookmarkRepository = bookmarkRepository;
         this.folderRepository = folderRepository;
+        this.urlValidator = urlValidator;
     }
 
     public List<Bookmark> getAllBookmarks() {
@@ -63,36 +65,84 @@ public class BookmarkService {
         logger.debug("Deleted {} bookmarks", ids.size());
     }
 
+    /**
+     * Validates the URL using the URL validator.
+     * Wraps any validation errors in a descriptive IllegalArgumentException.
+     *
+     * @param url the URL to validate
+     * @throws IllegalArgumentException if the URL is invalid or inaccessible
+     */
+    private void validateUrl(String url) {
+        try {
+            urlValidator.validateUrl(url);
+        } catch (InvalidUrlException e) {
+            throw new IllegalArgumentException("Invalid bookmark URL: " + e.getMessage(), e);
+        }
+    }
+
+    /**
+     * Creates a new bookmark with the given details.
+     * Validates the URL and folder (if specified) before saving.
+     *
+     * @param bookmark the bookmark to create
+     * @return the created bookmark
+     * @throws IllegalArgumentException if the URL is invalid or the specified folder doesn't exist
+     */
     @Transactional
     public Bookmark createBookmark(Bookmark bookmark) {
         logger.debug("Creating new bookmark: {}", bookmark);
+
+        if (bookmark == null) {
+            throw new IllegalArgumentException("Bookmark cannot be null");
+        }
+
+        validateUrl(bookmark.getUrl());
+
         if (bookmark.getFolderId() != null) {
             logger.debug("Checking existence of folder with id: {}", bookmark.getFolderId());
             if (!folderRepository.existsById(bookmark.getFolderId())) {
                 logger.error("Folder not found with id: {}", bookmark.getFolderId());
-                throw new IllegalArgumentException("Folder not found with id: " + bookmark.getFolderId());
+                throw new IllegalArgumentException("Cannot create bookmark: Folder not found with id " + bookmark.getFolderId());
             }
         }
+
         Bookmark savedBookmark = bookmarkRepository.save(bookmark);
         logger.debug("Created bookmark: {}", savedBookmark);
         return savedBookmark;
     }
 
+    /**
+     * Updates an existing bookmark with new details.
+     * Validates the URL and folder (if specified) before updating.
+     *
+     * @param id the ID of the bookmark to update
+     * @param bookmarkDetails the new bookmark details
+     * @return Optional containing the updated bookmark, or empty if the bookmark wasn't found
+     * @throws IllegalArgumentException if the URL is invalid or the specified folder doesn't exist
+     */
     @Transactional
     public Optional<Bookmark> updateBookmark(Long id, Bookmark bookmarkDetails) {
         logger.debug("Updating bookmark with id: {} with details: {}", id, bookmarkDetails);
+
+        if (bookmarkDetails == null) {
+            throw new IllegalArgumentException("Bookmark details cannot be null");
+        }
+
         return bookmarkRepository.findById(id)
                 .map(bookmark -> {
                     bookmark.setTitle(bookmarkDetails.getTitle());
+                    validateUrl(bookmarkDetails.getUrl());
                     bookmark.setUrl(bookmarkDetails.getUrl());
                     bookmark.setDescription(bookmarkDetails.getDescription());
+
                     if (bookmarkDetails.getFolderId() != null) {
                         logger.debug("Checking existence of folder with id: {}", bookmarkDetails.getFolderId());
                         if (!folderRepository.existsById(bookmarkDetails.getFolderId())) {
                             logger.error("Folder not found with id: {}", bookmarkDetails.getFolderId());
-                            throw new IllegalArgumentException("Folder not found with id: " + bookmarkDetails.getFolderId());
+                            throw new IllegalArgumentException("Cannot update bookmark: Folder not found with id " + bookmarkDetails.getFolderId());
                         }
                     }
+
                     bookmark.setFolderId(bookmarkDetails.getFolderId());
                     Bookmark updatedBookmark = bookmarkRepository.save(bookmark);
                     logger.debug("Updated bookmark: {}", updatedBookmark);
